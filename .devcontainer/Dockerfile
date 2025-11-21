@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     python3-venv \
     git \
+    git-lfs \
     curl \
     vim \
     sudo \
@@ -18,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates \
     dirmngr \
+    && git lfs install \
     && rm -rf /var/lib/apt/lists/*
 
 # Criar link simbólico para python
