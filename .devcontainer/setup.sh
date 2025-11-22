@@ -3,14 +3,6 @@ set -euo pipefail
 
 echo "[setup] Starting post-create setup..."
 
-# Ativa task_delayacct no kernel (tenta sysctl, fallback para write em /proc)
-# isso é para o clickhouse
-if command -v sudo >/dev/null 2>&1; then
-  sudo sysctl -w kernel.task_delayacct=1 >/dev/null 2>&1 || sudo sh -c 'echo 1 > /proc/sys/kernel/task_delayacct' >/dev/null 2>&1 || true
-else
-  sysctl -w kernel.task_delayacct=1 >/dev/null 2>&1 || sh -c 'echo 1 > /proc/sys/kernel/task_delayacct' >/dev/null 2>&1 || true
-fi
-
 # Ensure ~/.local/bin is on PATH for user-installed Python scripts
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$HOME/.local/bin"; then
   if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bashrc" 2>/dev/null; then
@@ -97,5 +89,24 @@ fi
 # Iniciar o clickhouse
 echo "[install] Starting clickhouse server..."
 sudo clickhouse start
+
+# Ativa task_delayacct no kernel (tenta sysctl, fallback para write em /proc)
+# isso é para o clickhouse
+if command -v sudo >/dev/null 2>&1; then
+  sudo sysctl -w kernel.task_delayacct=1 >/dev/null 2>&1 || sudo sh -c 'echo 1 > /proc/sys/kernel/task_delayacct' >/dev/null 2>&1 || true
+else
+  sysctl -w kernel.task_delayacct=1 >/dev/null 2>&1 || sh -c 'echo 1 > /proc/sys/kernel/task_delayacct' >/dev/null 2>&1 || true
+fi
+
+# Para salvar a senha e entrar automaticamente
+echo "[setup] Configuring ClickHouse client environment variables..."
+cat >> ~/.bashrc << 'EOF'
+
+# ClickHouse Client Configuration
+export CLICKHOUSE_USER="default"
+export CLICKHOUSE_PASSWORD="785498"
+export CLICKHOUSE_HOST="localhost"
+EOF
+source ~/.bashrc
 
 echo "[setup] Done."
